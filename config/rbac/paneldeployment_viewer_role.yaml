@@ -1,0 +1,27 @@
+# permissions for end users to view paneldeployments.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: paneldeployment-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: birdpanel-operator
+    app.kubernetes.io/part-of: birdpanel-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: paneldeployment-viewer-role
+rules:
+- apiGroups:
+  - birdpanel.osm8.live
+  resources:
+  - paneldeployments
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - birdpanel.osm8.live
+  resources:
+  - paneldeployments/status
+  verbs:
+  - get

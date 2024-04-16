@@ -1,0 +1,12 @@
+apiVersion: birdpanel.osm8.live/v1alpha1
+kind: PanelDeployment
+metadata:
+  labels:
+    app.kubernetes.io/name: paneldeployment
+    app.kubernetes.io/instance: paneldeployment-sample
+    app.kubernetes.io/part-of: birdpanel-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: birdpanel-operator
+  name: paneldeployment-sample
+spec:
+  # TODO(user): Add fields here

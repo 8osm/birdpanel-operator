@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- birdpanel_v1alpha1_paneldeployment.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

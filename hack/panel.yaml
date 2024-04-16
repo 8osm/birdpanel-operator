@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pterodactyl-panel
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pterodactyl-panel
+  template:
+    metadata:
+      labels:
+        app: pterodactyl-panel
+    spec:
+      containers:
+        - name: php-sidecar
+          image: php:8.1.28-cli-bullseye
+          command: ["sleep"]
+          args: ["infinity"]
+        - name: pterodactyl-panel
+          image: ghcr.io/pterodactyl/panel:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: APP_URL
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: APP_URL
+            - name: APP_TIMEZONE
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: APP_TIMEZONE
+            - name: APP_SERVICE_AUTHOR
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: APP_SERVICE_AUTHOR
+            - name: MAIL_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MAIL_FROM
+            - name: MAIL_DRIVER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MAIL_DRIVER
+            - name: MAIL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MAIL_HOST
+            - name: MAIL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MAIL_PORT
+            - name: MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MAIL_USERNAME
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MAIL_PASSWORD
+            - name: DB_USERNAME
+              value: "root"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pterodb-root
+                  key: password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pterocache-redis
+                  key: redis-password
+            - name: APP_KEY
+              value: "supersecretappkey"
+            - name: APP_ENV
+              value: "production"
+            - name: APP_ENVIRONMENT_ONLY
+              value: "false"
+            - name: CACHE_DRIVER
+              value: "redis"
+            - name: SESSION_DRIVER
+              value: "redis"
+            - name: QUEUE_DRIVER
+              value: "redis"
+            - name: REDIS_HOST
+              value: "pterocache-redis-master"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: DB_HOST
+              value: "pterodb"
+            - name: DB_PORT
+              value: "3306"
+            - name: MAIL_ENCRYPTION
+              value: "true"
+          volumeMounts:
+            - name: var
+              mountPath: /app/var
+            - name: nginx-config
+              mountPath: /etc/nginx/http.d
+            - name: logs
+              mountPath: /app/storage/logs
+      volumes:
+        - name: var
+          emptyDir: {}
+        - name: nginx-config
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pterodactyl-panel-service
+spec:
+  type: ClusterIP
+  selector:
+    app: pterodactyl-panel
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pterodactyl-panel-ingress
+spec:
+  rules:
+    - host: kpanel.osm8.live
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: pterodactyl-panel-service
+                port:
+                  number: 80
