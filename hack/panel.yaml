@@ -137,7 +137,7 @@ metadata:
   name: pterodactyl-panel-ingress
 spec:
   rules:
-    - host: kpanel.osm8.live
+    - host: panel.example.com
       http:
         paths:
           - pathType: Prefix
